@@ -1,9 +1,13 @@
 .area {
     display: flex;
     flex-direction:row;
+    justify-content:center;
+    align-items: center;
+    min-height:246px;
 }
 .characterCard {
     margin: 20px;
+    display: flex;
 }
 .characterCard__image {
     height:200px;
@@ -34,4 +38,16 @@
 
 #attackButton, #restartButton {
     margin:10px;
+}
+
+#header {
+    min-height:100px;
+    text-align: center;
+    font-size: 72px;
+    font-weight:700;
+}
+
+.test {
+    position: absolute;
+    
 }
