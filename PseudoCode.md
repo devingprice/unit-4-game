@@ -35,8 +35,9 @@ var enemyArray = [
 
 # On Screen
 charactersStartArea
-EnemiesSelectArea
-DefenderArea
+enemiesSelectArea
+defenderArea
 
-AttackButton
-RestartButton
+buttonArea
+    AttackButton
+    RestartButton

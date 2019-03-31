@@ -1,0 +1,37 @@
+.area {
+    display: flex;
+    flex-direction:row;
+}
+.characterCard {
+    margin: 20px;
+}
+.characterCard__image {
+    height:200px;
+    width:100px;
+}
+
+
+#charactersStartArea{
+    background-color: lightgrey;
+    border: dashed red;
+    margin: 30px;
+}
+#enemiesSelectArea {
+    background-color: lightgrey;
+    border: dashed yellow;
+    margin: 30px;
+}
+#defenderArea {
+    background-color: lightgrey;
+    border: dashed blue;
+    margin: 30px;
+}
+#buttonArea {
+    background-color: lightgrey;
+    border: dashed green;
+    margin: 30px;
+}
+
+#attackButton, #restartButton {
+    margin:10px;
+}
