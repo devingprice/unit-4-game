@@ -54,12 +54,12 @@ var game = {
             game.update()
         }
     },
-    persistentInit: function(){
+    persistentInit: function () {
         stage.initialize();
         appearanceController.persistentInit();
         controlsController.update();
     },
-    persistentUpdate: function(){
+    persistentUpdate: function () {
         stage.checkConditionsIfUpdateNeeded();
         appearanceController.persistentRender();;
         controlsController.turnOffClicks();
@@ -82,7 +82,7 @@ var controlsController = {
     addSelectCharacter: function () {
         $(".characterCard").each(function () {
             $(this).click(function () {
-                console.log('Action -> Select Player '+ this.id)
+                console.log('Action -> Select Player ' + this.id)
                 stage.selectPlayer(this.id)
 
                 stage.phase++;
@@ -94,7 +94,7 @@ var controlsController = {
         stage.characters.forEach(function (char) {
             $("#" + char.name).each(function () {
                 $(this).click(function () {
-                    console.log('Action -> Select Enemy '+ this.id)
+                    console.log('Action -> Select Enemy ' + this.id)
                     stage.selectEnemy(this.id)
                     //stage.phase++;
                     stage.phase++;
@@ -104,7 +104,7 @@ var controlsController = {
 
         })
     },
-    turnOffClicks: function(){
+    turnOffClicks: function () {
         console.log('Logged -> Turned off clicks')
         $(".characterCard").each(function () {
             $(this).unbind('click')
@@ -182,7 +182,7 @@ var stage = {
         }
         console.log('88888888888888888888888888888888888888888888888888888888888888888888888888888888888888')
         console.log(this.player)
-        console.log(this.player.name,'attacked',this.enemy.name,'for',holder,"leaving him with",this.enemy.hitPoints,'hp and making players attack equal',this.player.attackPower)
+        console.log(this.player.name, 'attacked', this.enemy.name, 'for', holder, "leaving him with", this.enemy.hitPoints, 'hp and making players attack equal', this.player.attackPower)
     },
     reset: function () {
         this.phase = 0;
@@ -204,7 +204,7 @@ var stage = {
             //alert('enemy killed')
             appearanceController.removeEnemy(this.enemy.name);
             this.enemy = null;
-            
+
 
             console.log('removed enemy', this.characters.length, "left")
             if (this.characters.length > 0) {
@@ -231,55 +231,55 @@ var stage = {
 }
 
 var screen = {
-    empty: function(){
+    empty: function () {
         $('#header').empty();
         $('#charactersStartArea').empty();
         $('#enemiesSelectArea').empty();
         $('#defenderArea').empty();
         $("#buttonArea").empty();
     },
-    setup: function(){},
-    update: function(){},
+    setup: function () { },
+    update: function () { },
 
-    setHeader:function(text){
+    setHeader: function (text) {
 
     },
-    createCharacterCard: function(character){},
-    moveCharactersToEnemySelect: function(){
+    createCharacterCard: function (character) { },
+    moveCharactersToEnemySelect: function () {
         stage.characters.forEach(function (char) {
-            if( $("#"+char.name ).parent().attr("id") !== "enemiesSelectArea"){
-                appearanceController.moveAnimate("#"+char.name , "#enemiesSelectArea");
+            if ($("#" + char.name).parent().attr("id") !== "enemiesSelectArea") {
+                appearanceController.moveAnimate("#" + char.name, "#enemiesSelectArea");
             }
         })
     },
-    moveEnemyToDefenderArea: function(){
-        if( $("#"+stage.enemy.name ).parent().attr("id") !== "defenderArea"){
-            appearanceController.moveAnimate("#"+stage.enemy.name , "#defenderArea");
+    moveEnemyToDefenderArea: function () {
+        if ($("#" + stage.enemy.name).parent().attr("id") !== "defenderArea") {
+            appearanceController.moveAnimate("#" + stage.enemy.name, "#defenderArea");
         }
     },
-    removeCharacter: function(name){
-        $("#"+name ).fadeOut(300, function() { 
-            $(this).remove(); 
+    removeCharacter: function (name) {
+        $("#" + name).fadeOut(300, function () {
+            $(this).remove();
         });
     },
-    updatePlayerStats(){
-        function updateStats(characterItem){
-            if(characterItem !== undefined && characterItem !== null){
-                $('#'+characterItem.name).find(".characterCard__name").text( characterItem.name)
-                $('#'+characterItem.name).find(".characterCard__hitpoints").text('HP : ' + characterItem.hitPoints)
-                if(characterItem.role === 'player'){
-                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.attackPower)
-                } else if (characterItem.role === 'enemy'){
-                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.counterAttackPower)
+    updatePlayerStats() {
+        function updateStats(characterItem) {
+            if (characterItem !== undefined && characterItem !== null) {
+                $('#' + characterItem.name).find(".characterCard__name").text(characterItem.name)
+                $('#' + characterItem.name).find(".characterCard__hitpoints").text('HP : ' + characterItem.hitPoints)
+                if (characterItem.role === 'player') {
+                    $('#' + characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.attackPower)
+                } else if (characterItem.role === 'enemy') {
+                    $('#' + characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.counterAttackPower)
                 }
-                
+
             }
         }
-        stage.characters.map(function(char){updateStats(char)});
+        stage.characters.map(function (char) { updateStats(char) });
         updateStats(stage.player);
         updateStats(stage.enemy);
     }
-    
+
 };
 
 var appearanceController = {
@@ -334,8 +334,8 @@ var appearanceController = {
             })
         } else if (stage.phase === 2) {
 
-            $('#fightStage').css({display:"flex","flex-direction":"row","justify-content":"center"});
-            
+            $('#fightStage').css({ display: "flex", "flex-direction": "row", "justify-content": "center" });
+
             //player in start, enemy in defender, rest in select
             if (stage.player) {
                 $('#charactersStartArea').append(this.createCharacterCard(stage.player));
@@ -357,11 +357,11 @@ var appearanceController = {
 
         $('#header').text(stage.phases[stage.phase]);
     },
-    shake: function(id){
-        console.log('shake', id, "#"+ id)
+    shake: function (id) {
+        console.log('shake', id, "#" + id)
         //$("#"+id).delay(100).shake() //this works on things not being refreshed
     },
-    persistentInit: function() {
+    persistentInit: function () {
         stage.characters.forEach(function (char) {
             $('#charactersStartArea').append(appearanceController.createCharacterCard(char));
         })
@@ -371,70 +371,70 @@ var appearanceController = {
         var attackButton = $('<button>', { id: "attackButton", class: "btn btn-danger" }).text("Attack");
         $("#buttonArea").append(attackButton.hide());
     },
-    moveCharactersToEnemySelect(){
+    moveCharactersToEnemySelect() {
         stage.characters.forEach(function (char) {
-            if( $("#"+char.name ).parent().attr("id") !== "enemiesSelectArea"){
-                appearanceController.moveAnimate("#"+char.name , "#enemiesSelectArea");
+            if ($("#" + char.name).parent().attr("id") !== "enemiesSelectArea") {
+                appearanceController.moveAnimate("#" + char.name, "#enemiesSelectArea");
             }
         })
     },
-    removeEnemy(name){
-        $("#"+name ).fadeOut(300, function() { 
-            $(this).remove(); 
+    removeEnemy(name) {
+        $("#" + name).fadeOut(300, function () {
+            $(this).remove();
         });
     },
-    removePlayer(name){
-        $("#"+name ).fadeOut(300, function() { 
-            $(this).remove(); 
+    removePlayer(name) {
+        $("#" + name).fadeOut(300, function () {
+            $(this).remove();
         });
     },
-    moveEnemyToDefenderArea(){
-        if( $("#"+stage.enemy.name ).parent().attr("id") !== "defenderArea"){
-            appearanceController.moveAnimate("#"+stage.enemy.name , "#defenderArea");
+    moveEnemyToDefenderArea() {
+        if ($("#" + stage.enemy.name).parent().attr("id") !== "defenderArea") {
+            appearanceController.moveAnimate("#" + stage.enemy.name, "#defenderArea");
         }
     },
-    updatePlayerStats(){
-        function updateStats(characterItem){
-            if(characterItem !== undefined && characterItem !== null){
-                $('#'+characterItem.name).find(".characterCard__name").text( characterItem.name)
-                $('#'+characterItem.name).find(".characterCard__hitpoints").text('HP : ' + characterItem.hitPoints)
-                if(characterItem.role === 'player'){
-                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.attackPower)
-                } else if (characterItem.role === 'enemy'){
-                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.counterAttackPower)
+    updatePlayerStats() {
+        function updateStats(characterItem) {
+            if (characterItem !== undefined && characterItem !== null) {
+                $('#' + characterItem.name).find(".characterCard__name").text(characterItem.name)
+                $('#' + characterItem.name).find(".characterCard__hitpoints").text('HP : ' + characterItem.hitPoints)
+                if (characterItem.role === 'player') {
+                    $('#' + characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.attackPower)
+                } else if (characterItem.role === 'enemy') {
+                    $('#' + characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.counterAttackPower)
                 }
-                
+
             }
         }
-        stage.characters.map(function(char){updateStats(char)});
+        stage.characters.map(function (char) { updateStats(char) });
         updateStats(stage.player);
         updateStats(stage.enemy);
     },
-    persistentRender: function(){
+    persistentRender: function () {
         //player in start, rest in select
 
         if (stage.phase === 1) {
             //player in start, rest in select
-            
+
         } else if (stage.phase === 2) {
-            $('#fightStage').css({display:"flex","flex-direction":"row","justify-content":"center"});
-            
+            $('#fightStage').css({ display: "flex", "flex-direction": "row", "justify-content": "center" });
+
             //player in start, enemy in defender, rest in select, show attack button
             this.updatePlayerStats()
             $("#attackButton").show();
         }
 
     },
-    moveAnimate: function (element, newParent){
+    moveAnimate: function (element, newParent) {
         //https://stackoverflow.com/questions/907279/jquery-animate-moving-dom-element-to-new-parent
-        console.log('Moved',element,"to",newParent);
+        console.log('Moved', element, "to", newParent);
         element = $(element);
-        newParent= $(newParent);
-    
+        newParent = $(newParent);
+
         var oldOffset = element.offset();
         element.appendTo(newParent);
         var newOffset = element.offset();
-    
+
         var temp = element.clone().appendTo('body');
         temp.css({
             'position': 'absolute',
@@ -443,12 +443,12 @@ var appearanceController = {
             'z-index': 1000
         });
         element.hide();
-        temp.animate({'top': newOffset.top, 'left': newOffset.left}, 'slow', function(){
-           element.show();
-           temp.remove();
+        temp.animate({ 'top': newOffset.top, 'left': newOffset.left }, 'slow', function () {
+            element.show();
+            temp.remove();
         });
     },
-    test:function(){
+    test: function () {
         this.renderClear();
         this.persistentInit();
         this.persistentRender();
@@ -505,4 +505,41 @@ function(){
         });
         this.count++;
     }
+*/
+
+/* http://css3.bradshawenterprises.com/cfimg/
+$(".spin-button").on("click", function(){
+      captainPlanet.animate(
+        { deg: 180 },
+        {
+          duration: 1200,
+          step: function(now) {
+            $(this).css({ transform: 'rotateY(' + now + 'deg)' });
+          }
+        }
+      )
+    }
+*/
+
+
+// http://css3.bradshawenterprises.com/cfimg/
+function attkAnim(id) {
+    $(id).animate({ left: "+= 200" }, 200)
+        .animate({ left: '-=200' }, 300)
+}
+function defAnim(id) { // hit then counter or die 
+    $(id).delay(200)
+        .animate({ left: "+= 100" }, 100)
+        .animate({ left: '-=100' }, 150)
+}
+//hide show attack button on delay to allow animations
+// deathAnim instead of defanim
+// summon / grave anims
+
+//add attack icon to button
+// round 2
+
+/* Rather than add click handler to every dom
+Made dom have data-name and that runs function click(name) 
+click function checks the round and only does things if correct click
 */
