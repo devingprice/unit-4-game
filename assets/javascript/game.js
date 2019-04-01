@@ -29,33 +29,52 @@ var charactersDefault = charactersDefault = [
     }
 ]
 
-
-console.log('js')
 $(document).ready(function () {
     console.log('ready')
-    game.initialize();
+    game.persistentInit()
 
     $(document).click(function () {
-        //console.log("clicked")
-        game.update()
+        game.persistentUpdate();
     })
-
-
 });
 
 
+var game = {
+    initialize: function () {
+        stage.initialize()
+        appearanceController.render()
+        controlsController.update()
+        stage.showState()
+    },
+    update: function () {
+        var check = stage.checkConditionsIfUpdateNeeded();
+        appearanceController.render()
+        controlsController.update()
+        if (check) {
+            game.update()
+        }
+    },
+    persistentInit: function(){
+        stage.initialize();
+        appearanceController.persistentInit();
+        controlsController.update();
+    },
+    persistentUpdate: function(){
+        stage.checkConditionsIfUpdateNeeded();
+        appearanceController.persistentRender();;
+        controlsController.turnOffClicks();
+        controlsController.update();
+    }
+}
+
 
 var controlsController = {
-
     update: function () {
-        if (game.phase === 0) {
-            console.log("CC has phase ", game.phase, ' -> add char sel')
+        if (stage.phase === 0) {
             this.addSelectCharacter();
-        } else if (game.phase === 1) {
-            console.log("CC has phase ", game.phase, ' -> add enemy sel')
+        } else if (stage.phase === 1) {
             this.addSelectToEnemies();
-        } else if (game.phase === 2) {
-            console.log("CC has phase ", game.phase, ' -> add attk')
+        } else if (stage.phase === 2) {
             this.addAttack();
         }
         this.addRestart();
@@ -63,9 +82,10 @@ var controlsController = {
     addSelectCharacter: function () {
         $(".characterCard").each(function () {
             $(this).click(function () {
+                console.log('Action -> Select Player '+ this.id)
                 stage.selectPlayer(this.id)
 
-                game.phase++;
+                stage.phase++;
                 stage.showState();
             })
         })
@@ -74,19 +94,30 @@ var controlsController = {
         stage.characters.forEach(function (char) {
             $("#" + char.name).each(function () {
                 $(this).click(function () {
+                    console.log('Action -> Select Enemy '+ this.id)
                     stage.selectEnemy(this.id)
-                    //game.phase++;
-                    game.phase++;
+                    //stage.phase++;
+                    stage.phase++;
                     stage.showState();
                 })
             })
 
         })
     },
+    turnOffClicks: function(){
+        console.log('Logged -> Turned off clicks')
+        $(".characterCard").each(function () {
+            $(this).unbind('click')
+        })
+        $("#restartButton").unbind('click')
+        $("#attackButton").unbind('click')
+    },
     addRestart: function () {
         $("#restartButton").click(function () {
-            stage.restart();
-            stage.showState();
+            console.log('Action -> Restart')
+            appearanceController.renderClear();
+            game.persistentInit();
+            //stage.showState();
         })
     },
     addAttack: function () {
@@ -97,50 +128,14 @@ var controlsController = {
     }
 }
 
-var game = {
+var stage = {
     phases: ["characterSelect", "enemySelect", "fight", "results"],
     phase: 0,
-    initialize: function () {
-        stage.initialize()
-        appearanceController.render()
-        controlsController.update()
-        stage.showState()
-
-        $("body").append(
-        appearanceController.createCharacterCard({
-            name: "Cinco",
-            image: "data:image/png;base64,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",
-            hitPoints: 1,
-            attackPower: 1,
-            counterAttackPower: 1
-        })
-        )
-    },
-    update: function () {
-        /*if(stage.checkConditionsIfUpdateNeeded()){
-            this.initialize();
-        }
-        appearanceController.render()
-        controlsController.update()
-        console.log(stage.checkConditionsIfUpdateNeeded());
-        */
-        var check = stage.checkConditionsIfUpdateNeeded();
-
-        appearanceController.render()
-        controlsController.update()
-        if (check) {
-            game.update()
-            //stage.showState();
-        }
-    }
-}
-
-var stage = {
     characters: [],
     player: null,
     enemy: null,
     initialize: function () {
-        this.restart();
+        this.reset();
     },
     selectPlayer: function (playerName) {
         var index;
@@ -154,6 +149,8 @@ var stage = {
             this.player.role = "player";
             this.player.baseAttackPower = this.player.attackPower;
             this.characters.splice(index, 1);
+
+            appearanceController.moveCharactersToEnemySelect();
         }
     },
     selectEnemy: function (enemyName) {
@@ -167,53 +164,65 @@ var stage = {
             this.enemy = this.characters[index];
             this.enemy.role = "enemy";
             this.characters.splice(index, 1);
+
+            appearanceController.moveEnemyToDefenderArea();
         }
     },
     attack: function () {
+        var holder = this.player.attackPower;
         this.enemy.hitPoints -= this.player.attackPower;
         this.player.attackPower += this.player.baseAttackPower;
 
         appearanceController.shake(this.enemy.name)
+        appearanceController.shake("Cinco");
 
         //counter
         if (this.enemy.hitPoints > 0) {
             this.player.hitPoints -= this.enemy.counterAttackPower;
         }
+        console.log('88888888888888888888888888888888888888888888888888888888888888888888888888888888888888')
+        console.log(this.player)
+        console.log(this.player.name,'attacked',this.enemy.name,'for',holder,"leaving him with",this.enemy.hitPoints,'hp and making players attack equal',this.player.attackPower)
     },
-    restart: function () {
-        game.phase = 0;
+    reset: function () {
+        this.phase = 0;
         this.player = null;
         this.enemy = null;
         this.characters = $.extend(true, [], charactersDefault);
     },
     checkConditionsIfUpdateNeeded: function () {
         if (this.player && this.player.hitPoints <= 0) {
+            appearanceController.removePlayer(this.player.name);
             this.player = null;
-            game.phase = 3;
-            console.log('Stage has phase', game.phase)
+            this.phase = 3;
+            console.log('Stage has phase', this.phase)
             alert('You lose')
             return true;
         }
 
         if (this.enemy && this.enemy.hitPoints <= 0) {
             //alert('enemy killed')
+            appearanceController.removeEnemy(this.enemy.name);
             this.enemy = null;
+            
 
             console.log('removed enemy', this.characters.length, "left")
             if (this.characters.length > 0) {
-                game.phase = 1;
+                this.phase = 1;
+                $("#attackButton").hide();
             } else {
-                game.phase = 3;
+                this.phase = 3;
+                $("#attackButton").hide();
                 alert('You win')
             }
-            console.log('Stage has phase', game.phase)
+            console.log('Stage has phase', this.phase)
             return true;
         }
         return false;
     },
     showState: function () {
         console.log('~~~~~~~~~~~~~~')
-        console.log('Phase: ', game.phases[game.phase])
+        console.log('Phase: ', this.phases[this.phase])
         console.log('Characters: ', this.characters)
         console.log('Player: ', this.player)
         console.log('Enemy: ', this.enemy)
@@ -221,6 +230,244 @@ var stage = {
     }
 }
 
+var screen = {
+    empty: function(){
+        $('#header').empty();
+        $('#charactersStartArea').empty();
+        $('#enemiesSelectArea').empty();
+        $('#defenderArea').empty();
+        $("#buttonArea").empty();
+    },
+    setup: function(){},
+    update: function(){},
+
+    setHeader:function(text){
+
+    },
+    createCharacterCard: function(character){},
+    moveCharactersToEnemySelect: function(){
+        stage.characters.forEach(function (char) {
+            if( $("#"+char.name ).parent().attr("id") !== "enemiesSelectArea"){
+                appearanceController.moveAnimate("#"+char.name , "#enemiesSelectArea");
+            }
+        })
+    },
+    moveEnemyToDefenderArea: function(){
+        if( $("#"+stage.enemy.name ).parent().attr("id") !== "defenderArea"){
+            appearanceController.moveAnimate("#"+stage.enemy.name , "#defenderArea");
+        }
+    },
+    removeCharacter: function(name){
+        $("#"+name ).fadeOut(300, function() { 
+            $(this).remove(); 
+        });
+    },
+    updatePlayerStats(){
+        function updateStats(characterItem){
+            if(characterItem !== undefined && characterItem !== null){
+                $('#'+characterItem.name).find(".characterCard__name").text( characterItem.name)
+                $('#'+characterItem.name).find(".characterCard__hitpoints").text('HP : ' + characterItem.hitPoints)
+                if(characterItem.role === 'player'){
+                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.attackPower)
+                } else if (characterItem.role === 'enemy'){
+                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.counterAttackPower)
+                }
+                
+            }
+        }
+        stage.characters.map(function(char){updateStats(char)});
+        updateStats(stage.player);
+        updateStats(stage.enemy);
+    }
+    
+};
+
+var appearanceController = {
+    renderClear: function () {
+        $('#header').empty();
+        $('#charactersStartArea').empty();
+        $('#enemiesSelectArea').empty();
+        $('#defenderArea').empty();
+        $("#buttonArea").empty();
+    },
+    createCharacterCard: function (character) {
+        var roleClass = '';
+        if (character.role) {
+            roleClass = character.role;
+        }
+
+        var attackTag = '<p class="characterCard__attack">Attack Power : ' + character.attackPower + '</p><p class="characterCard__attack">Counter Attack Power : ' + character.counterAttackPower + '</p>';
+        //overwrite attackTag if character has a role
+        if (character.role === "player") {
+            attackTag = '<p class="characterCard__attack">Current Attack Power : ' + character.attackPower + '</p>';
+        } else if (character.role === "enemy") {
+            attackTag = '<p class="characterCard__attack">Counter Attack Power : ' + character.counterAttackPower + '</p>';
+        }
+
+
+        var html = '<div class="characterCard ' + roleClass + '" id="' + character.name + '">' +
+            '<img src="' + character.image + '" class="characterCard__image" alt="' + character.name + '">' +
+            '<div class="characterCard__info">' +
+            '<p class="characterCard__name">Name : ' + character.name + '</p>' +
+            '<p  class="characterCard__hitpoints">HitPoints : ' + character.hitPoints + '</p>' +
+            attackTag +
+            '</div></div>';
+        return html;
+    },
+    render: function () {
+        console.log('AC recieved phase', stage.phase)
+
+        this.renderClear();
+        if (stage.phase === 0) {
+            // all in start
+            stage.characters.forEach(function (char) {
+                $('#charactersStartArea').append(appearanceController.createCharacterCard(char));
+            })
+        } else if (stage.phase === 1) {
+
+            //player in start, rest in select
+            if (stage.player) {
+                $('#charactersStartArea').append(this.createCharacterCard(stage.player));
+            }
+            stage.characters.forEach(function (char) {
+                $('#enemiesSelectArea').append(appearanceController.createCharacterCard(char));
+            })
+        } else if (stage.phase === 2) {
+
+            $('#fightStage').css({display:"flex","flex-direction":"row","justify-content":"center"});
+            
+            //player in start, enemy in defender, rest in select
+            if (stage.player) {
+                $('#charactersStartArea').append(this.createCharacterCard(stage.player));
+            }
+            if (stage.enemy) {
+                $('#defenderArea').append(this.createCharacterCard(stage.enemy));
+            }
+            stage.characters.forEach(function (char) {
+                $('#enemiesSelectArea').append(appearanceController.createCharacterCard(char));
+            })
+
+            var attackButton = $('<button>', { id: "attackButton" }).text("Attack");
+            $("#buttonArea").append(attackButton);
+        }
+
+
+        var restartButton = $('<button>', { id: "restartButton" }).text("Restart");
+        $("#buttonArea").append(restartButton);
+
+        $('#header').text(stage.phases[stage.phase]);
+    },
+    shake: function(id){
+        console.log('shake', id, "#"+ id)
+        //$("#"+id).delay(100).shake() //this works on things not being refreshed
+    },
+    persistentInit: function() {
+        stage.characters.forEach(function (char) {
+            $('#charactersStartArea').append(appearanceController.createCharacterCard(char));
+        })
+
+        var restartButton = $('<button>', { id: "restartButton", class: "btn btn-outline-secondary" }).text("Restart");
+        $("#buttonArea").append(restartButton);
+        var attackButton = $('<button>', { id: "attackButton", class: "btn btn-danger" }).text("Attack");
+        $("#buttonArea").append(attackButton.hide());
+    },
+    moveCharactersToEnemySelect(){
+        stage.characters.forEach(function (char) {
+            if( $("#"+char.name ).parent().attr("id") !== "enemiesSelectArea"){
+                appearanceController.moveAnimate("#"+char.name , "#enemiesSelectArea");
+            }
+        })
+    },
+    removeEnemy(name){
+        $("#"+name ).fadeOut(300, function() { 
+            $(this).remove(); 
+        });
+    },
+    removePlayer(name){
+        $("#"+name ).fadeOut(300, function() { 
+            $(this).remove(); 
+        });
+    },
+    moveEnemyToDefenderArea(){
+        if( $("#"+stage.enemy.name ).parent().attr("id") !== "defenderArea"){
+            appearanceController.moveAnimate("#"+stage.enemy.name , "#defenderArea");
+        }
+    },
+    updatePlayerStats(){
+        function updateStats(characterItem){
+            if(characterItem !== undefined && characterItem !== null){
+                $('#'+characterItem.name).find(".characterCard__name").text( characterItem.name)
+                $('#'+characterItem.name).find(".characterCard__hitpoints").text('HP : ' + characterItem.hitPoints)
+                if(characterItem.role === 'player'){
+                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.attackPower)
+                } else if (characterItem.role === 'enemy'){
+                    $('#'+characterItem.name).find(".characterCard__attack").text('AP : ' + characterItem.counterAttackPower)
+                }
+                
+            }
+        }
+        stage.characters.map(function(char){updateStats(char)});
+        updateStats(stage.player);
+        updateStats(stage.enemy);
+    },
+    persistentRender: function(){
+        //player in start, rest in select
+
+        if (stage.phase === 1) {
+            //player in start, rest in select
+            
+        } else if (stage.phase === 2) {
+            $('#fightStage').css({display:"flex","flex-direction":"row","justify-content":"center"});
+            
+            //player in start, enemy in defender, rest in select, show attack button
+            this.updatePlayerStats()
+            $("#attackButton").show();
+        }
+
+    },
+    moveAnimate: function (element, newParent){
+        //https://stackoverflow.com/questions/907279/jquery-animate-moving-dom-element-to-new-parent
+        console.log('Moved',element,"to",newParent);
+        element = $(element);
+        newParent= $(newParent);
+    
+        var oldOffset = element.offset();
+        element.appendTo(newParent);
+        var newOffset = element.offset();
+    
+        var temp = element.clone().appendTo('body');
+        temp.css({
+            'position': 'absolute',
+            'left': oldOffset.left,
+            'top': oldOffset.top,
+            'z-index': 1000
+        });
+        element.hide();
+        temp.animate({'top': newOffset.top, 'left': newOffset.left}, 'slow', function(){
+           element.show();
+           temp.remove();
+        });
+    },
+    test:function(){
+        this.renderClear();
+        this.persistentInit();
+        this.persistentRender();
+    }
+}
+
+/*
+healthbar
+https://codepen.io/kenbarrios/pen/JdzdzL
+https://codepen.io/AndrewMcDowe/pen/akWBKj?html-preprocessor=slim 
+
+Currently I'm redrawing every frame
+This works well to get it working but when I want to animate the css it's not working
+
+use this for targetting 
+https://codepen.io/ThibaultJanBeyer/pen/RRPQEX
+*/
+
+/*
 $.fn.shake = function() {
     this.each(function(i) {
         $(this).css({
@@ -246,93 +493,16 @@ $.fn.shake = function() {
     });
     return this;
 }
-
-var appearanceController = {
-    renderClear: function () {
-        $('#header').empty();
-        $('#charactersStartArea').empty();
-        $('#enemiesSelectArea').empty();
-        $('#defenderArea').empty();
-        $("#buttonArea").empty();
-    },
-    createCharacterCard: function (character) {
-        var roleClass = '';
-        if (character.role) {
-            roleClass = character.role;
-        }
-
-        var attackTag = '<p>Attack Power : ' + character.attackPower + '</p><p>Counter Attack Power : ' + character.counterAttackPower + '</p>';
-        //overwrite attackTag if character has a role
-        if (character.role === "player") {
-            attackTag = '<p>Current Attack Power : ' + character.attackPower + '</p>';
-        } else if (character.role === "enemy") {
-            attackTag = '<p>Counter Attack Power : ' + character.counterAttackPower + '</p>';
-        }
-
-
-        var html = '<div class="characterCard ' + roleClass + '" id="' + character.name + '">' +
-            '<img src="' + character.image + '" class="characterCard__image" alt="' + character.name + '">' +
-            '<div class="characterCard__info">' +
-            '<p>Name : ' + character.name + '</p>' +
-            '<p>HitPoints : ' + character.hitPoints + '</p>' +
-            attackTag +
-            '</div></div>';
-        return html;
-    },
-    render: function () {
-        console.log('AC recieved phase', game.phase)
-        this.renderClear();
-        if (game.phase === 0) {
-            // all in start
-            stage.characters.forEach(function (char) {
-                $('#charactersStartArea').append(appearanceController.createCharacterCard(char));
-            })
-        } else if (game.phase === 1) {
-
-            //player in start, rest in select
-            if (stage.player) {
-                $('#charactersStartArea').append(this.createCharacterCard(stage.player));
-            }
-            stage.characters.forEach(function (char) {
-                $('#enemiesSelectArea').append(appearanceController.createCharacterCard(char));
-            })
-        } else if (game.phase === 2) {
-
-            $('#fightStage').css({display:"flex","flex-direction":"row","justify-content":"center"});
-            
-            //player in start, enemy in defender, rest in select
-            if (stage.player) {
-                $('#charactersStartArea').append(this.createCharacterCard(stage.player));
-            }
-            if (stage.enemy) {
-                $('#defenderArea').append(this.createCharacterCard(stage.enemy));
-            }
-            stage.characters.forEach(function (char) {
-                $('#enemiesSelectArea').append(appearanceController.createCharacterCard(char));
-            })
-
-            var attackButton = $('<button>', { id: "attackButton" }).text("Attack");
-            $("#buttonArea").append(attackButton);
-        }
-
-
-        var restartButton = $('<button>', { id: "restartButton" }).text("Restart");
-        $("#buttonArea").append(restartButton);
-
-        $('#header').text(game.phases[game.phase]);
-    },
-    shake: function(id){
-        console.log('shake', id, "#"+ id)
-        $("#Cinco").delay(100).shake() //this works on things not being refreshed
-    }
-}
-
-/*
-healthbar
-https://codepen.io/kenbarrios/pen/JdzdzL
-https://codepen.io/AndrewMcDowe/pen/akWBKj?html-preprocessor=slim 
-
-Currently I'm redrawing every frame
-This works well to get it working but when I want to animate the css it's not working
 */
 
+/*
+function(){
+        this.frameContainer.className = "";
+        window.requestAnimationFrame(function(time) {
+            window.requestAnimationFrame(function(time) {
+                document.getElementById('frame-container').className = "slide-sideways";
+            });
+        });
+        this.count++;
+    }
+*/

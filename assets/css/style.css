@@ -1,13 +1,18 @@
+* {
+    box-sizing: border-box;
+}
 .area {
     display: flex;
     flex-direction:row;
     justify-content:center;
     align-items: center;
     min-height:246px;
+    min-width: 320px;
 }
 .characterCard {
     margin: 20px;
     display: flex;
+    position: relative;
 }
 .characterCard__image {
     height:200px;
@@ -49,5 +54,5 @@
 
 .test {
     position: absolute;
-    
+
 }
