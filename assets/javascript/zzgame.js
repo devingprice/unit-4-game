@@ -213,6 +213,8 @@ function initialize() {
         .append(createCharacterCard(troll))
         .append(createCharacterCard(warrior))
 
+
+
 }
 initialize();
 $("#attackButton").click(function () {
@@ -229,14 +231,16 @@ $("#restartButton").click(function () {
 $('.character-cont').on('click', function () {
     if (phase === 0) {
         selectPlayer($(this).attr('data-char'));
-        phase++;
+
+        changePhase(1);
     } else if (phase === 1) {
-        if( $(this).attr('data-char') !== player.name){
+        if ($(this).attr('data-char') !== player.name) {
             selectEnemy($(this).attr('data-char'));
             $('#attackButton').show();
-            phase++;
+
+            changePhase(2);
         }
-        
+
     }
 });
 
@@ -249,7 +253,7 @@ function createCharacterCard(character) {
         "data-char": character.name
     })
     var role = "";
-    if (character.role !== undefined){ role = character.role};
+    if (character.role !== undefined) { role = character.role };
     var card = $('<div>', {
         class: "character-card " + role,
         id: character.name
@@ -313,30 +317,30 @@ var player = null; //knight
 var enemy = null; //orc
 
 function selectPlayer(playerName) {
-    console.log('select player '+playerName)
+    console.log('select player ' + playerName)
     player = window[playerName.toLowerCase()]
     player.role = 'player';
-    $('#'+playerName).addClass('player');
+    $('#' + playerName).addClass('player');
     movePlayerToAttackerArea()
 };
 function selectEnemy(enemyName) {
-    console.log('select enemy '+ enemyName)
+    console.log('select enemy ' + enemyName)
     enemy = window[enemyName.toLowerCase()]
     player.role = 'enemy';
-    $('#'+enemyName).addClass('enemy');
+    $('#' + enemyName).addClass('enemy');
     moveEnemyToDefenderArea();
 };
 function removeCharacter(name) {
-    $("#" + name+'-cont').fadeOut(300, function () {
+    $("#" + name + '-cont').fadeOut(300, function () {
         $(this).remove();
     });
 }
 
 function reset() {
-    this.phase = 0;
-    this.player = null;
-    this.enemy = null;
-        
+    changePhase(0);
+    player = null;
+    enemy = null;
+
     removeCharacter('Knight');
     removeCharacter('Orc');
     removeCharacter('Troll');
@@ -352,19 +356,21 @@ function reset() {
         .append(createCharacterCard(orc))
         .append(createCharacterCard(troll))
         .append(createCharacterCard(warrior))
-    
-        
+
+
     $('.character-cont').on('click', function () {
         if (phase === 0) {
             selectPlayer($(this).attr('data-char'));
-            phase++;
+
+            changePhase(1);
         } else if (phase === 1) {
-            if( $(this).attr('data-char') !== player.name){
+            if ($(this).attr('data-char') !== player.name) {
                 selectEnemy($(this).attr('data-char'));
                 $('#attackButton').show();
-                phase++;
+
+                changePhase(2);
             }
-            
+
         }
     });
 };
@@ -401,7 +407,8 @@ function timedAttack() {
         enemy.dieAnim();
         //removeCharacter(enemy.name);
         //enemy = null;
-        phase--;
+
+        changePhase(1);
     }
 
     setTimeout(function () {
@@ -410,17 +417,19 @@ function timedAttack() {
             console.log('enemy died')
             removeCharacter(enemy.name);
             enemy = null;
-            if($('characterSelectArea').html === '') {
-                phase = 4;
+            if ($('characterSelectArea').html === '') {
+
+                changePhase(4);
                 alert("YOU WIN")
             } else {
-                phase = 1;
+
+                changePhase(1);
             }
         }
     }, 200)
     setTimeout(function () {
         player.updateInfo()
-        if(player.hitPoints <= 0){
+        if (player.hitPoints <= 0) {
             console.log('player died')
             removeCharacter(player.name);
             player = null;
@@ -429,6 +438,14 @@ function timedAttack() {
         }
     }, 700)
 }
+
+function changePhase(newPhase) {
+    phase = newPhase;
+    console.log( phases[newPhase] )
+    $('#header').html( $('<h1>').text(phases[newPhase]) )
+}
+
+changePhase(0);
 
 /*
 function attack() {
@@ -460,16 +477,16 @@ function attack() {
 
 
 //function moveCharactersToEnemySelect() { }
-function movePlayerToAttackerArea(){ 
-    if ($("#" + player.name +'-cont').parent().attr("id") !== "attackerArea") {
-        moveAnimate("#" + player.name +'-cont', "#attackerArea");
+function movePlayerToAttackerArea() {
+    if ($("#" + player.name + '-cont').parent().attr("id") !== "attackerArea") {
+        moveAnimate("#" + player.name + '-cont', "#attackerArea");
     }
 }
 function moveEnemyToDefenderArea() {
-    if ($("#" + enemy.name +'-cont').parent().attr("id") !== "defenderArea") {
-        moveAnimate("#" + enemy.name +'-cont', "#defenderArea");
+    if ($("#" + enemy.name + '-cont').parent().attr("id") !== "defenderArea") {
+        moveAnimate("#" + enemy.name + '-cont', "#defenderArea");
     }
- }
+}
 
 
 
@@ -500,10 +517,10 @@ var knight = {
     counterAttackPower: 35,
     attackAnim: function (directionMove) {
         var refer = this;
-        var first = "+=200"; 
+        var first = "+=200";
         var second = "-=200";
         if (directionMove === "left") {
-            first = "-=200"; 
+            first = "-=200";
             second = "+=200";
         }
         $("#" + this.name).find("img").eq(0)//.attr('src', refer.images.attack)
@@ -514,10 +531,10 @@ var knight = {
     },
     defAnim: function (directionHit) {
         var refer = this;
-        var first = "+=100"; 
+        var first = "+=100";
         var second = "-=100";
         if (directionHit === "left") {
-            first = "-=100"; 
+            first = "-=100";
             second = "+=100";
         }
         setTimeout(function () {
@@ -531,9 +548,9 @@ var knight = {
     },
     dieAnim: function (directionHit) {
         var refer = this;
-        var first = "+=100"; 
+        var first = "+=100";
         if (directionHit === "left") {
-            first = "-=100"; 
+            first = "-=100";
         }
         setTimeout(function () {
             $('#' + refer.name)//.delay(500)
@@ -545,7 +562,7 @@ var knight = {
                         'src': refer.images.die,
                         "class": 'character-img dead'
                     });
-                    //$(this).attr('src', refer.images.die); 
+                    //$(this).attr('src', refer.images.die);
                     next()
                 })
         }, 200)
@@ -596,10 +613,10 @@ var orc = {
     counterAttackPower: 35,
     attackAnim: function (directionMove) {
         var refer = this;
-        var first = "+=200"; 
+        var first = "+=200";
         var second = "-=200";
         if (directionMove === "left") {
-            first = "-=200"; 
+            first = "-=200";
             second = "+=200";
         }
         $("#" + this.name).find("img").eq(0)//.attr('src', refer.images.attack)
@@ -610,10 +627,10 @@ var orc = {
     },
     defAnim: function (directionHit) {
         var refer = this;
-        var first = "+=100"; 
+        var first = "+=100";
         var second = "-=100";
         if (directionHit === "left") {
-            first = "-=100"; 
+            first = "-=100";
             second = "+=100";
         }
         setTimeout(function () {
@@ -627,9 +644,9 @@ var orc = {
     },
     dieAnim: function (directionHit) {
         var refer = this;
-        var first = "+=100"; 
+        var first = "+=100";
         if (directionHit === "left") {
-            first = "-=100"; 
+            first = "-=100";
         }
         setTimeout(function () {
             $('#' + refer.name)//.delay(500)
@@ -641,7 +658,7 @@ var orc = {
                         'src': refer.images.die,
                         "class": 'character-img dead'
                     });
-                    //$(this).attr('src', refer.images.die); 
+                    //$(this).attr('src', refer.images.die);
                     next()
                 })
         }, 200)

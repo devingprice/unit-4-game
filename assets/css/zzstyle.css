@@ -42,7 +42,7 @@ html, body, #game {
     height:100%;
 }
 .character-img{
-    width: 282px;
+    /*width: 282px;*/
     height: 200px;
     position: absolute;
     left: 0;
