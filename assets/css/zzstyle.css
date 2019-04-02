@@ -5,7 +5,7 @@ html, body, #game {
     height:100%;
 }
 #header{
-    min-height: 400px;
+    /*min-height: 400px;*/
 }
 .area {
     min-height: 50px;
@@ -14,11 +14,19 @@ html, body, #game {
     justify-content: center;
     align-items: center;
     position: relative;
+    margin-top: 200px;
 }
 .btn-container {
     display:flex;
     justify-content: center;
     align-items: center;
+}
+
+#attackerArea {
+    justify-content: flex-end;
+}
+#defenderArea {
+    justify-content: left;
 }
 
 

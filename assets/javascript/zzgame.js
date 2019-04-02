@@ -49,101 +49,80 @@ var orc = {
 };
 
 */
-
-var knight = {
-    role: "player",
-    name: "Knight",
-    images: {
-        idle: 'assets/images/knight/_IDLE_000.png',
-        attack: 'assets/images/knight/ATTACK_007.png',
-        hurt: 'assets/images/knight/_HURT_004.png',
-        die: 'assets/images/knight/_DIE_006.png'
-    },
-    hitPoints: 120,
-    defaultHitPoints: 120,
-    attackPower: 8,
-    defaultttackPower: 8,
-    counterAttackPower: 35,
-    attackAnim: function () {
+var characterBase = {
+    attackAnim: function (directionMove) {
         var refer = this;
-        $("#" + this.name).find("img").eq(0).attr('src', refer.images.attack)
-            .animate({ left: "+=200" }, 200)
-            .animate({ left: '-=200' }, 300)
+        var first = "+=200";
+        var second = "-=200";
+        if (directionMove === "left") {
+            first = "-=200";
+            second = "+=200";
+        }
+        $("#" + this.name).find("img").eq(0)//.attr('src', refer.images.attack)
+            .queue(function (next) { $(this).attr('src', refer.images.attack); next() })
+            .animate({ left: first }, 200)
+            .animate({ left: second }, 300)
             .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
     },
-    defAnim: function () {
+    defAnim: function (directionHit) {
         var refer = this;
+        var first = "+=100";
+        var second = "-=100";
+        if (directionHit === "left") {
+            first = "-=100";
+            second = "+=100";
+        }
         setTimeout(function () {
             $('#' + refer.name)//.delay(500)
                 .find("img").eq(0).attr('src', refer.images.hurt)
-                .animate({ left: "+=100" }, 200)
-                .animate({ left: '-=100' }, 150)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 100)
                 .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
         }, 200)
 
     },
-    updateInfo: function () {
-        $('#' + this.name).find(".character-hitpoints").text(this.hitPoints)
-        $('#' + this.name).find(".character").text(this.attackPower)
-    },
-    removeHealth: function () {
-        $('#' + this.name).find(".healthBarValue").css('width', (this.hitPoints / this.defaultHitPoints) + '%')
-        $('#' + this.name).find(".healthBarValue").text(this.hitPoints)
-    }
-}
-
-var orc = {
-    role: "enemy",
-    name: "orc",
-    images: {
-        idle: 'assets/images/orc/IDLE_000.png',
-        attack: 'assets/images/orc/ATTAK_005.png',
-        hurt: 'assets/images/orc/HURT_004.png',
-        die: 'assets/images/orc/DIE_006.png'
-    },
-    hitPoints: 100,
-    defaultHitPoints: 100,
-    attackPower: 8,
-    defaultttackPower: 8,
-    counterAttackPower: 35,
-    attackAnim: function () {
+    dieAnim: function (directionHit) {
         var refer = this;
-        $("#" + this.name).find("img").eq(0).attr('src', refer.images.attack)
-            .animate({ left: "+=200" }, 200)
-            .animate({ left: '-=200' }, 300)
-            .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
-    },
-    defAnim: function () {
-        var refer = this;
+        var first = "+=100";
+        if (directionHit === "left") {
+            first = "-=100";
+        }
         setTimeout(function () {
             $('#' + refer.name)//.delay(500)
                 .find("img").eq(0).attr('src', refer.images.hurt)
-                .animate({ left: "+=100" }, 200)
-                .animate({ left: '-=100' }, 150)
-                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
-        }, 200)
-
-    },
-    dieAnim: function () {
-        var refer = this;
-        setTimeout(function () {
-            $('#' + refer.name)//.delay(500)
-                .find("img").eq(0).attr('src', refer.images.hurt)
-                .animate({ left: "+=100" }, 200)
-                .queue(function (next) { 
+                .animate({ left: first }, 200)
+                .queue(function (next) {
                     $(this).removeClass('enemy');
                     $(this).attr({
                         'src': refer.images.die,
                         "class": 'character-img dead'
-                    }); 
+                    });
                     //$(this).attr('src', refer.images.die); 
-                    next() 
+                    next()
                 })
         }, 200)
     },
+    counterAnim: function () {
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 150)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 500)
+    },
+    counteredAnim: function () {
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 150)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 500)
+    },
     updateInfo: function () {
         $('#' + this.name).find(".character-hitpoints").text(this.hitPoints)
-        $('#' + this.name).find(".character").text(this.attackPower)
+        $('#' + this.name).find(".character-attack").text(this.attackPower)
         this.removeHealth();
     },
     removeHealth: function () {
@@ -152,28 +131,127 @@ var orc = {
         console.log('lost hp', (this.hitPoints / this.defaultHitPoints) * 100)
     }
 }
+function createCharacter(base, data) {
+    var character = Object.assign({}, base);
+    character.name = data.name;
+    character.images = data.images;
+    character.hitPoints = data.hitPoints;
+    character.defaultHitPoints = data.hitPoints;
+    character.attackPower = data.attackPower;
+    character.defaultAttackPower = data.attackPower;
+    character.counterAttackPower = data.counterAttackPower;
+    return character;
+}
 
-// loop
+var knightData = {
+    name: "Knight",
+    images: {
+        idle: 'assets/images/knight/_IDLE_000.png',
+        attack: 'assets/images/knight/ATTACK_007.png',
+        hurt: 'assets/images/knight/_HURT_004.png',
+        die: 'assets/images/knight/_DIE_006.png'
+    },
+    hitPoints: 120,
+    attackPower: 8,
+    counterAttackPower: 35,
+}
+var warriorData = {
+    name: "Warrior",
+    images: {
+        idle: 'assets/images/warrior/1_IDLE_000.png',
+        attack: 'assets/images/warrior/5_ATTACK_006.png',
+        hurt: 'assets/images/warrior/6_HURT_002.png',
+        die: 'assets/images/warrior/7_DIE_009.png'
+    },
+    hitPoints: 120,
+    attackPower: 8,
+    counterAttackPower: 35
+};
+var trollData = {
+    name: "Troll",
+    images: {
+        idle: 'assets/images/troll/IDLE_000.png',
+        attack: 'assets/images/troll/ATTAK_004.png',
+        hurt: 'assets/images/troll/HURT_004.png',
+        die: 'assets/images/troll/DIE_006.png'
+    },
+    hitPoints: 180,
+    attackPower: 5,
+    counterAttackPower: 25
+};
+var orcData = {
+    name: "Orc",
+    images: {
+        idle: 'assets/images/orc/IDLE_000.png',
+        attack: 'assets/images/orc/ATTAK_005.png',
+        hurt: 'assets/images/orc/HURT_004.png',
+        die: 'assets/images/orc/DIE_006.png'
+    },
+    hitPoints: 100,
+    attackPower: 25,
+    counterAttackPower: 5
+};
+
+
+
+
+var knight = createCharacter(characterBase, knightData)
+//knight.role = 'player';
+var orc = createCharacter(characterBase, orcData)
+//orc.role = 'enemy';
+var troll = createCharacter(characterBase, trollData)
+var warrior = createCharacter(characterBase, warriorData)
 
 function initialize() {
-    //$('#attackButton').hide();
-    $("#charactersStartArea").append(createCharacterCard(knight))
-    $("#charactersStartArea").append(createCharacterCard(orc))
+    $('#attackButton').hide();
+
+    //$("#charactersStartArea").append(createCharacterCard(knight))
+    //$("#charactersStartArea").append(createCharacterCard(orc))
+    $("#characterSelectArea")
+        .append(createCharacterCard(knight))
+        .append(createCharacterCard(orc))
+        .append(createCharacterCard(troll))
+        .append(createCharacterCard(warrior))
+
 }
 initialize();
 $("#attackButton").click(function () {
-    attack();
+    //attack();
+    timedAttack();
+    $("#attackButton").hide();
+    setTimeout(function () {
+        $("#attackButton").show();
+    }, 500)
 })
 $("#restartButton").click(function () {
     reset();
 })
+$('.character-cont').on('click', function () {
+    if (phase === 0) {
+        selectPlayer($(this).attr('data-char'));
+        phase++;
+    } else if (phase === 1) {
+        if( $(this).attr('data-char') !== player.name){
+            selectEnemy($(this).attr('data-char'));
+            $('#attackButton').show();
+            phase++;
+        }
+        
+    }
+});
 
 
 // render 
 function createCharacterCard(character) {
-    var container = $('<div>').addClass("character-cont");
+    var container = $('<div>', {
+        class: "character-cont",
+        id: character.name + '-cont',
+        "data-char": character.name
+    })
+    var role = "";
+    if (character.role !== undefined){ role = character.role};
     var card = $('<div>', {
-        class: "character-card " + character.role,
+        class: "character-card " + role,
         id: character.name
     }).appendTo(container);
 
@@ -185,21 +263,21 @@ function createCharacterCard(character) {
 
     var info = $('<div>', { class: "character-info" }).appendTo(card);
 
-    $('<div>', { class: "character-name" }).text(character.name).appendTo(info);
-    $('<div>', { class: "character-hitpoints" }).text("HP:" + character.hitPoints).appendTo(info);
+    $('<span>', { class: "character-name" }).text(character.name).appendTo(info);
+    //$('<div>', { class: "character-hitpoints" }).text("HP:" + character.hitPoints).appendTo(info);
 
 
     if (character.role === 'player') {
-        $('<p>', { class: "character-attack" }).text("Attack: " + character.attackPower).appendTo(info)
+        $('<span>', { class: "character-attack" }).text("Attack: " + character.attackPower).appendTo(info)
     } else if (character.role === 'enemy') {
-        $('<p>', { class: "character-attack" }).text("Counter Attack: " + character.counterAttackPower).appendTo(info)
+        $('<span>', { class: "character-attack" }).text("Counter Attack: " + character.counterAttackPower).appendTo(info)
     } else {
-        $('<p>', { class: "character-attack" }).text("Attack: " + character.attackPower).appendTo(info)
-        $('<p>', { class: "character-attack" }).text("Counter Attack: " + character.counterAttackPower).appendTo(info)
+        $('<span>', { class: "character-attack" }).text("Attack: " + character.attackPower).appendTo(info)
+        $('<span>', { class: "character-attack" }).text("Counter Attack: " + character.counterAttackPower).appendTo(info)
     }
 
     var hpShell = $('<div>', { class: "healthbar-shell" }).appendTo(info);
-    $('<div>', { class: "healthbar-value" }).appendTo(hpShell);
+    $('<div>', { class: "healthbar-value" }).text("HP:" + character.hitPoints).appendTo(hpShell);
     return container;
 }
 function moveAnimate(element, newParent) {
@@ -227,35 +305,138 @@ function moveAnimate(element, newParent) {
 };
 
 
-
-
 // STAGE
+var phases = ['Select your Character', 'Choose your enemy', 'FIGHT', 'Results']
 var phase = 0;
 var characters = [];
-var player = knight;//null;
-var enemy = orc;//null;
+var player = null; //knight
+var enemy = null; //orc
 
 function selectPlayer(playerName) {
-
+    console.log('select player '+playerName)
+    player = window[playerName.toLowerCase()]
+    player.role = 'player';
+    $('#'+playerName).addClass('player');
+    movePlayerToAttackerArea()
 };
 function selectEnemy(enemyName) {
-
+    console.log('select enemy '+ enemyName)
+    enemy = window[enemyName.toLowerCase()]
+    player.role = 'enemy';
+    $('#'+enemyName).addClass('enemy');
+    moveEnemyToDefenderArea();
 };
+function removeCharacter(name) {
+    $("#" + name+'-cont').fadeOut(300, function () {
+        $(this).remove();
+    });
+}
+
 function reset() {
-    //this.phase = 0;
-    //this.player = null;
-    //this.enemy = null;
-    //this.characters = $.extend(true, [], charactersDefault);
+    this.phase = 0;
+    this.player = null;
+    this.enemy = null;
+        
+    removeCharacter('Knight');
+    removeCharacter('Orc');
+    removeCharacter('Troll');
+    removeCharacter('Warrior');
+
+    knight = createCharacter(characterBase, knightData)
+    orc = createCharacter(characterBase, orcData)
+    troll = createCharacter(characterBase, trollData)
+    warrior = createCharacter(characterBase, warriorData)
+
+    $("#characterSelectArea")
+        .append(createCharacterCard(knight))
+        .append(createCharacterCard(orc))
+        .append(createCharacterCard(troll))
+        .append(createCharacterCard(warrior))
+    
+        
+    $('.character-cont').on('click', function () {
+        if (phase === 0) {
+            selectPlayer($(this).attr('data-char'));
+            phase++;
+        } else if (phase === 1) {
+            if( $(this).attr('data-char') !== player.name){
+                selectEnemy($(this).attr('data-char'));
+                $('#attackButton').show();
+                phase++;
+            }
+            
+        }
+    });
 };
 
 
 
+function timedAttack() {
+    //attack
+    enemy.hitPoints -= player.attackPower;
+    player.attackPower += player.defaultAttackPower;
 
+    console.log(player.attackPower)
+    if (enemy.hitPoints > 0) {
+        player.hitPoints -= enemy.counterAttackPower;
+        player.attackAnim(); //500
+        enemy.defAnim();//500
+
+        //counter 
+        setTimeout(function () {
+            console.log('countered')
+            enemy.attackAnim('left');
+            if (player.hitPoints > 0) {
+                player.defAnim("left")
+            } else {
+                player.dieAnim('left');
+                //removeCharacter(player.name);
+                //player = null;
+                //phase++;
+                $('#attackButton').hide();
+            }
+        }, 500)
+    } else {
+        player.attackAnim()
+        enemy.dieAnim();
+        //removeCharacter(enemy.name);
+        //enemy = null;
+        phase--;
+    }
+
+    setTimeout(function () {
+        enemy.updateInfo()
+        if (enemy.hitPoints <= 0) {
+            console.log('enemy died')
+            removeCharacter(enemy.name);
+            enemy = null;
+            if($('characterSelectArea').html === '') {
+                phase = 4;
+                alert("YOU WIN")
+            } else {
+                phase = 1;
+            }
+        }
+    }, 200)
+    setTimeout(function () {
+        player.updateInfo()
+        if(player.hitPoints <= 0){
+            console.log('player died')
+            removeCharacter(player.name);
+            player = null;
+            phase = 4;
+            alert('YOU LOSE')
+        }
+    }, 700)
+}
+
+/*
 function attack() {
     //if counter, player.countered()
 
     enemy.hitPoints -= player.attackPower;
-    player.attackPower += player.defaultttackPower;
+    player.attackPower += player.defaultAttackPower;
+
     if (enemy.hitPoints > 0) {
         player.hitPoints -= enemy.counterAttackPower;
 
@@ -273,20 +454,225 @@ function attack() {
     player.updateInfo()
 };
 
+*/
 
 
 
 
-function removeCharacter(name) {
-    $("#" + name).fadeOut(300, function () {
-        $(this).remove();
-    });
+//function moveCharactersToEnemySelect() { }
+function movePlayerToAttackerArea(){ 
+    if ($("#" + player.name +'-cont').parent().attr("id") !== "attackerArea") {
+        moveAnimate("#" + player.name +'-cont', "#attackerArea");
+    }
 }
-function moveCharactersToEnemySelect() { }
-function moveEnemyToDefenderArea() { }
+function moveEnemyToDefenderArea() {
+    if ($("#" + enemy.name +'-cont').parent().attr("id") !== "defenderArea") {
+        moveAnimate("#" + enemy.name +'-cont', "#defenderArea");
+    }
+ }
 
 
 
 
 
 
+
+
+
+
+
+
+
+/*
+var knight = {
+    role: "player",
+    name: "Knight",
+    images: {
+        idle: 'assets/images/knight/_IDLE_000.png',
+        attack: 'assets/images/knight/ATTACK_007.png',
+        hurt: 'assets/images/knight/_HURT_004.png',
+        die: 'assets/images/knight/_DIE_006.png'
+    },
+    hitPoints: 120,
+    defaultHitPoints: 120,
+    attackPower: 8,
+    defaultAttackPower: 8,
+    counterAttackPower: 35,
+    attackAnim: function (directionMove) {
+        var refer = this;
+        var first = "+=200"; 
+        var second = "-=200";
+        if (directionMove === "left") {
+            first = "-=200"; 
+            second = "+=200";
+        }
+        $("#" + this.name).find("img").eq(0)//.attr('src', refer.images.attack)
+            .queue(function (next) { $(this).attr('src', refer.images.attack); next() })
+            .animate({ left: first }, 200)
+            .animate({ left: second }, 300)
+            .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+    },
+    defAnim: function (directionHit) {
+        var refer = this;
+        var first = "+=100"; 
+        var second = "-=100";
+        if (directionHit === "left") {
+            first = "-=100"; 
+            second = "+=100";
+        }
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 100)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 200)
+
+    },
+    dieAnim: function (directionHit) {
+        var refer = this;
+        var first = "+=100"; 
+        if (directionHit === "left") {
+            first = "-=100"; 
+        }
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .queue(function (next) {
+                    $(this).removeClass('enemy');
+                    $(this).attr({
+                        'src': refer.images.die,
+                        "class": 'character-img dead'
+                    });
+                    //$(this).attr('src', refer.images.die); 
+                    next()
+                })
+        }, 200)
+    },
+    counterAnim: function(){
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 150)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 500)
+    },
+    counteredAnim: function(){
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 150)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 500)
+    },
+    updateInfo: function () {
+        $('#' + this.name).find(".character-hitpoints").text(this.hitPoints)
+        $('#' + this.name).find(".character-attack").text(this.attackPower)
+        this.removeHealth();
+    },
+    removeHealth: function () {
+        $('#' + this.name).find(".healthbar-value").css('width', (this.hitPoints / this.defaultHitPoints) * 100 + '%')
+        $('#' + this.name).find(".healthbar-value").text(this.hitPoints)
+        console.log('lost hp', (this.hitPoints / this.defaultHitPoints) * 100)
+    }
+}
+
+var orc = {
+    role: "enemy",
+    name: "orc",
+    images: {
+        idle: 'assets/images/orc/IDLE_000.png',
+        attack: 'assets/images/orc/ATTAK_005.png',
+        hurt: 'assets/images/orc/HURT_004.png',
+        die: 'assets/images/orc/DIE_006.png'
+    },
+    hitPoints: 100,
+    defaultHitPoints: 100,
+    attackPower: 8,
+    defaultAttackPower: 8,
+    counterAttackPower: 35,
+    attackAnim: function (directionMove) {
+        var refer = this;
+        var first = "+=200"; 
+        var second = "-=200";
+        if (directionMove === "left") {
+            first = "-=200"; 
+            second = "+=200";
+        }
+        $("#" + this.name).find("img").eq(0)//.attr('src', refer.images.attack)
+            .queue(function (next) { $(this).attr('src', refer.images.attack); next() })
+            .animate({ left: first }, 200)
+            .animate({ left: second }, 300)
+            .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+    },
+    defAnim: function (directionHit) {
+        var refer = this;
+        var first = "+=100"; 
+        var second = "-=100";
+        if (directionHit === "left") {
+            first = "-=100"; 
+            second = "+=100";
+        }
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 100)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 200)
+
+    },
+    dieAnim: function (directionHit) {
+        var refer = this;
+        var first = "+=100"; 
+        if (directionHit === "left") {
+            first = "-=100"; 
+        }
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .queue(function (next) {
+                    $(this).removeClass('enemy');
+                    $(this).attr({
+                        'src': refer.images.die,
+                        "class": 'character-img dead'
+                    });
+                    //$(this).attr('src', refer.images.die); 
+                    next()
+                })
+        }, 200)
+    },
+    counterAnim: function(){
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 150)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 500)
+    },
+    counteredAnim: function(){
+        setTimeout(function () {
+            $('#' + refer.name)//.delay(500)
+                .find("img").eq(0).attr('src', refer.images.hurt)
+                .animate({ left: first }, 200)
+                .animate({ left: second }, 150)
+                .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
+        }, 500)
+    },
+    updateInfo: function () {
+        $('#' + this.name).find(".character-hitpoints").text(this.hitPoints)
+        $('#' + this.name).find(".character-attack").text(this.attackPower)
+        this.removeHealth();
+    },
+    removeHealth: function () {
+        $('#' + this.name).find(".healthbar-value").css('width', (this.hitPoints / this.defaultHitPoints) * 100 + '%')
+        $('#' + this.name).find(".healthbar-value").text(this.hitPoints)
+        console.log('lost hp', (this.hitPoints / this.defaultHitPoints) * 100)
+    }
+}
+*/
