@@ -1,54 +1,3 @@
-/*
-var warrior = {
-    name: "Warrior",
-    images: {
-        idle: 'assets/images/warrior/1_IDLE_000.png',
-        attack: 'assets/images/warrior/5_ATTACK_006.png',
-        hurt: 'assets/images/warrior/6_HURT_002.png',
-        die: 'assets/images/warrior/7_DIE_009.png'
-    },
-    hitPoints: 120,
-    attackPower: 8,
-    counterAttackPower: 35
-};
-var troll = {
-    name: "Troll",
-    images: {
-        idle: 'assets/images/troll/IDLE_000.png',
-        attack: 'assets/images/troll/ATTAK_004.png',
-        hurt: 'assets/images/troll/HURT_004.png',
-        die: 'assets/images/troll/DIE_006.png'
-    },
-    hitPoints: 180,
-    attackPower: 5,
-    counterAttackPower: 25
-};
-var knight = {
-    name: "Knight",
-    images: {
-        idle: 'assets/images/knight/_IDLE_000.png',
-        attack: 'assets/images/knight/ATTACK_007.png',
-        hurt: 'assets/images/knight/_HURT_004.png',
-        die: 'assets/images/knight/_DIE_006.png'
-    },
-    hitPoints: 150,
-    attackPower: 15,
-    counterAttackPower: 20
-};
-var orc = {
-    name: "Orc",
-    images: {
-        idle: 'assets/images/orc/IDLE_000.png',
-        attack: 'assets/images/orc/ATTAK_005.png',
-        hurt: 'assets/images/orc/HURT_004.png',
-        die: 'assets/images/orc/DIE_006.png'
-    },
-    hitPoints: 100,
-    attackPower: 25,
-    counterAttackPower: 5
-};
-
-*/
 var characterBase = {
     attackAnim: function (directionMove) {
         var refer = this;
@@ -139,6 +88,7 @@ var characterBase = {
         console.log('lost hp', (this.hitPoints / this.defaultHitPoints) * 100)
     }
 }
+
 function createCharacter(base, data) {
     var character = Object.assign({}, base);
     character.name = data.name;
@@ -154,10 +104,10 @@ function createCharacter(base, data) {
 var knightData = {
     name: "Knight",
     images: {
-        idle: 'assets/images/knight/_IDLE_000.png',
+        idle: 'assets/images/knight/IDLE_000.png',
         attack: 'assets/images/knight/ATTACK_007.png',
-        hurt: 'assets/images/knight/_HURT_004.png',
-        die: 'assets/images/knight/_DIE_006.png'
+        hurt: 'assets/images/knight/HURT_004.png',
+        die: 'assets/images/knight/DIE_006.png'
     },
     hitPoints: 120,
     attackPower: 8,

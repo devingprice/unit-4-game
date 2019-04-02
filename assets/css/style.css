@@ -157,3 +157,7 @@ body{
     color:rgba(255, 255, 255, .7);
     text-align: center;
 }
+
+#attackButton {
+    margin-right:100px;
+}
