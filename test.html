@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fighting Game</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/reset.css">
+    <style>
+        html,
+        body,
+        #fightStage,
+        .area {
+            height: 100%;
+            width: 100%;
+        }
+
+        .area {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        img {
+            width: 200px;
+            height: 200px;
+        }
+
+        .characterCard-cont {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 30px;
+        }
+
+        .characterCard {
+            position: absolute;
+            width:100%;
+            height:100%;
+        }
+
+        .characterCard__image {
+            position: absolute;
+            left: 0;
+            /*
+            -webkit-transition: opacity 1s ease-in-out;
+            -moz-transition: opacity 1s ease-in-out;
+            -o-transition: opacity 1s ease-in-out;
+            transition: opacity 1s ease-in-out;*/
+            opacity: 0;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+            filter: alpha(opacity=0);
+        }
+        .characterCard__info {
+            position: absolute;
+            bottom:100%;
+            width:100%;
+        }
+
+        .opaque {
+            opacity: 1;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+            filter: alpha(opacity=1);
+        }
+
+        #Warrior img {
+            -moz-transform: scaleX(-1);
+            -o-transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+            filter: FlipH;
+            -ms-filter: "FlipH";
+        }
+
+        .healthbar-shell {
+            width: 100%;
+            height: 50px;
+            background: rgba(0, 0, 0, .5);
+            border-radius: 12px;
+            box-sizing: border-box;
+            margin: 0px;
+            padding: 10px 16px 0px 15px;
+        }
+
+        .healthBarValue {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 0, 0, .5);
+            border: solid 1px;
+            border-color: rgba(255, 255, 255, .7);
+            box-sizing: border-box;
+            margin: 0px;
+            position: relative;
+        }
+    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <button id="attackButton">Attack</button>
+    <button id="defButton">Defend</button>
+    <div id="fightStage">
+        <div id="charactersStartArea" class="area"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+    <script>
+        var knight = {
+            name: "Knight",
+            images: {
+                idle: '_IDLE_000.png',
+                attack: 'ATTACK_007.png'
+            },
+            hitPoints: 120,
+            attackPower: 8,
+            counterAttackPower: 35
+        };
+        //var attackButton = $('<button>', { id: "attackButton" }).text("Attack");
+        $("#attackButton").click(function () {
+            //attkAnim("#Knight")
+            //changeImage('attack')
+            //jqImage(knight.images.attack)
+            knightObj.attackMove();
+            warriorObj.def();
+            removeHealth()
+        })
+        $("#defButton").click(function () {
+            defAnim("#Knight")
+        })
+        function createCharacterCard(character) {
+            var roleClass = '';
+            if (character.role) {
+                roleClass = character.role;
+            }
+
+            var attackTag = '<p class="characterCard__attack">Attack Power : ' + character.attackPower + '</p><p class="characterCard__attack">Counter Attack Power : ' + character.counterAttackPower + '</p>';
+            //overwrite attackTag if character has a role
+            if (character.role === "player") {
+                attackTag = '<p class="characterCard__attack">Current Attack Power : ' + character.attackPower + '</p>';
+            } else if (character.role === "enemy") {
+                attackTag = '<p class="characterCard__attack">Counter Attack Power : ' + character.counterAttackPower + '</p>';
+            }
+
+
+            var html = "<div class='characterCard-cont'>" +
+                '<div class="characterCard ' + roleClass + '" id="' + character.name + '">' +
+                '<img src="' + character.images.idle + '" class="characterCard__image opaque" alt="' + character.name + '">' +
+                //'<img src="' + character.images.attack + '" class="characterCard__image" alt="' + character.name + '">' +
+                '<div class="characterCard__info">' +
+                '<p class="characterCard__name">Name : ' + character.name + '</p>' +
+                '<p  class="characterCard__hitpoints">HitPoints : ' + character.hitPoints + '</p>' +
+                attackTag +
+
+                "<div class='healthbar-shell'><div class='healthBarValue'></div></div>" +
+                '</div></div></div>';
+            return html;
+        };
+        console.log()
+        $("#charactersStartArea").append(createCharacterCard(knight))
+
+        function attkAnim(id) {
+            $(id).animate({ left: "+=200" }, 200)
+                .animate({ left: '-=200' }, 300)
+        }
+        function defAnim(id) { // hit then counter or die 
+            $(id).delay(200)
+                .animate({ left: "+=100" }, 200)
+                .animate({ left: '-=100' }, 150)
+        }
+        function changeImage(newState) {
+            $('img').removeClass('opaque');
+            $('img').eq(1).addClass("opaque")
+        }
+        function jqImage(newImage) {
+            console.log('jq')
+            //$("img").eq(0).attr('src', newImage)
+            $("img").eq(0).attr('src', newImage)
+                .delay(600).queue(function (next) { $(this).attr('src', knight.images.idle); next() })
+        }
+        var knightObj = {
+            name: "Knight",
+            images: {
+                idle: '_IDLE_000.png',
+                attack: 'ATTACK_007.png'
+            },
+            hitPoints: 120,
+            attackPower: 8,
+            counterAttackPower: 35,
+            attackMove: function () {
+                $("#Knight").find("img").eq(0).attr('src', this.images.attack)
+                    .animate({ left: "+=200" }, 200)
+                    .animate({ left: '-=200' }, 300)
+                    .queue(function (next) { $(this).attr('src', knightObj.images.idle); next() })
+            }
+        }
+
+        var warriorObj = {
+            name: "Warrior",
+            images: {
+                idle: '_IDLE_000.png',
+                attack: 'ATTACK_007.png',
+                hurt: '_HURT_004.png'
+            },
+            hitPoints: 100,
+            attackPower: 8,
+            counterAttackPower: 35,
+            attackMove: function () {
+                $("#Warrior").find("img").eq(0).attr('src', this.images.attack)
+                    .delay(600).queue(function (next) { $(this).attr('src', warriorObj.images.idle); next() })
+            },
+            def: function () {
+                setTimeout(function () {
+                    $("#Warrior")//.delay(500)
+                        .find("img").eq(0).attr('src', warriorObj.images.hurt)
+                        .animate({ left: "+=100" }, 200)
+                        .animate({ left: '-=100' }, 150)
+                        .queue(function (next) { $(this).attr('src', warriorObj.images.idle); next() })
+                }, 200)
+
+            }
+        }
+
+        function removeHealth(){
+            warriorObj.hitPoints -= 20;
+            $('#Warrior').find(".healthBarValue").css('width','50%')
+            $('#Warrior').find(".healthBarValue").text(warriorObj.hitPoints)
+            console.log(
+                $('#Warrior').find(".healthBarValue")
+            )
+        }
+
+        $("#charactersStartArea").append(createCharacterCard(warriorObj))
+    </script>
+</body>
+
+</html>
