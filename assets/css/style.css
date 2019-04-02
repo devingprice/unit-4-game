@@ -1,11 +1,40 @@
+@font-face {
+    font-family: 'BreatheFireII';
+    src: url('../font/BreatheFireII.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+:root{
+    --text-slate: #0d0d0d;
+    --text-green:#8fc592;
+    --background-primary: #1a1010;
+    --background-secondary: #785c62;
+    --color-whiteish: rgba(255, 255, 255, .7);
+}
 * {
     box-sizing: border-box;
 }
 html, body, #game {
     height:100%;
 }
-#header{
+body{
+    background-color: #1a1010;
+    background: #1a1010 no-repeat top 68px center url('../images/background.png')
+}
+#header {
+    width:100%;
+    max-width:1920px;
+    margin:0 auto;
+    border: 10px solid #1a1010;  
+    background-color: #785c62;
+}
+#header h1{
     /*min-height: 400px;*/
+    margin: 0 auto;
+    font-family: 'BreatheFireII', serif;
+    text-align: center;
+    color: var(--text-green);
+    text-shadow: -1px 0 var(--text-slate), 0 1px var(--text-slate), 1px 0 var(--text-slate), 0 -1px var(--text-slate);
 }
 .area {
     min-height: 50px;
@@ -14,14 +43,20 @@ html, body, #game {
     justify-content: center;
     align-items: center;
     position: relative;
-    margin-top: 200px;
 }
 .btn-container {
     display:flex;
     justify-content: center;
     align-items: center;
 }
-
+#characterSelectArea {
+    margin-top: 40px;
+    margin-bottom: 30px;
+    min-height:620px;
+}
+.fightStage {
+    min-height: 310px;
+}
 #attackerArea {
     justify-content: flex-end;
 }
@@ -34,7 +69,7 @@ html, body, #game {
     position: relative;
     width: 200px;
     height: 200px;
-    margin: 30px;
+    margin: 80px 30px 30px;
 }
 .character-card {
     position: absolute;
@@ -64,6 +99,40 @@ html, body, #game {
     bottom:100%;
     width:100%;
 }
+.character-name {
+    font-family: 'BreatheFireII', serif;
+    color: var(--text-green);
+    font-size: 32px;
+    text-shadow: -1px 0 var(--text-slate), 0 1px var(--text-slate), 1px 0 var(--text-slate), 0 -1px var(--text-slate);
+}
+
+.character-attack{
+    margin-right: 20px;
+    font-weight:bold;
+    color: var(--text-green);
+    text-shadow: -1px 0 var(--text-slate), 0 1px var(--text-slate), 1px 0 var(--text-slate), 0 -1px var(--text-slate);
+
+    
+}
+.changeText {
+    display: inline-block;
+    transform-origin: 50% 100%;
+
+    animation-duration: .3s;
+    animation-name: fadeInAndScale;
+    animation-timing-function: linear;
+}
+@keyframes fadeInAndScale {
+    from {
+        opacity: 0.25;
+        transform: scale(5, 5) translate(-10px, 4px);;
+    }
+    to {
+        opacity: 1;
+        transform: scale(1, 1) ;
+    }
+}
+
 
 /*https://codepen.io/kenbarrios/pen/JdzdzL*/
 .healthbar-shell {
@@ -84,4 +153,7 @@ html, body, #game {
     box-sizing: border-box;
     margin: 0px;
     position: relative;
+
+    color:rgba(255, 255, 255, .7);
+    text-align: center;
 }

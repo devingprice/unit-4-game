@@ -7,15 +7,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Fighting Game</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/reset.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
 
 </head>
 
 <body>
+    <header id="header" ></header>
     <div id="game" class="container">
-        <header id="header" class="row"></header>
         <div id="characterSelectArea" class="row area"></div>
 
         <div class="container">
@@ -26,11 +27,8 @@
         </div>
 
         <div id="buttonArea" class="row area">
-            <div class="col-2"></div>
-            <div class="col-8 btn-container">
+            <div class="col-12 btn-container">
                 <button id="attackButton" class="btn btn-danger">Attack</button>
-            </div>
-            <div class="col-2 btn-container">
                 <button id="restartButton" class="btn btn-outline-secondary">Restart</button>
             </div>
         </div>
