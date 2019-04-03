@@ -370,15 +370,16 @@ function timedAttack() {
         changePhase(1);
     }
 
+    //animations
     setTimeout(function () {
         enemy.updateInfo()
         if (enemy.hitPoints <= 0) {
             console.log('enemy died')
             removeCharacter(enemy.name);
             enemy = null;
-            if ($('characterSelectArea').html === '') {
+            if ($('#characterSelectArea').html() === '') {
 
-                changePhase(4);
+                changePhase(3);
                 alert("YOU WIN")
             } else {
 
