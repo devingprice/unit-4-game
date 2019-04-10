@@ -161,3 +161,13 @@ body{
 #attackButton {
     margin-right:100px;
 }
+
+@media screen and (max-width: 540px){
+    .character-img{
+        height: 100px;
+    }
+    .character-cont{
+        width: 100px;
+        height: 100px;
+    }
+}

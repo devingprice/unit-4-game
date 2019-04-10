@@ -1,4 +1,5 @@
 var characterBase = {
+    timeoutRef: null,
     attackAnim: function (directionMove) {
         var refer = this;
         var first = "+=200";
@@ -8,7 +9,12 @@ var characterBase = {
             second = "+=200";
         }
         $("#" + this.name).find("img").eq(0)//.attr('src', refer.images.attack)
-            .queue(function (next) { $(this).attr('src', refer.images.attack); next() })
+            .queue(function (next) { 
+                //$(this).attr('src', refer.images.attack); 
+                clearInterval(refer.timeoutRef)
+                animationCycle("ATTACK", $(this), refer.imageNum.attack, 500, refer, '')
+                next() 
+            })
             .animate({ left: first }, 200)
             .animate({ left: second }, 300)
             .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
@@ -23,7 +29,12 @@ var characterBase = {
         }
         setTimeout(function () {
             $('#' + refer.name)//.delay(500)
-                .find("img").eq(0).attr('src', refer.images.hurt)
+                .find("img").eq(0)//.attr('src', refer.images.hurt)
+                .queue(function (next) { 
+                    clearInterval(refer.timeoutRef)
+                    animationCycle("HURT", $(this), refer.imageNum.hurt, 500, refer, '')
+                    next() 
+                })
                 .animate({ left: first }, 200)
                 .animate({ left: second }, 100)
                 .queue(function (next) { $(this).attr('src', refer.images.idle); next() })
@@ -38,7 +49,12 @@ var characterBase = {
         }
         setTimeout(function () {
             $('#' + refer.name)//.delay(500)
-                .find("img").eq(0).attr('src', refer.images.hurt)
+                .find("img").eq(0)
+                //.attr('src', refer.images.hurt)
+                .queue(function (next) { 
+                    animationCycle("DIE", $(this), refer.imageNum.die, 500, refer, '')
+                    next() 
+                })
                 .animate({ left: first }, 200)
                 .queue(function (next) {
                     $(this).removeClass('enemy');
@@ -86,13 +102,55 @@ var characterBase = {
         $('#' + this.name).find(".healthbar-value").css('width', (this.hitPoints / this.defaultHitPoints) * 100 + '%')
         $('#' + this.name).find(".healthbar-value").text( this.hitPoints )
         console.log('lost hp', (this.hitPoints / this.defaultHitPoints) * 100)
+    },
+    startIdle: function() {
+        var refer = this;
+        var numberOfImages = refer.imageNum.idle;
+        var animationTime = 500;
+        var count = 0;
+        var urlBase = 'assets/images/';
+
+        refer.timeoutRef = setInterval(function(){
+            if(count >= numberOfImages){
+                count = 0;
+            }
+            $("#" + refer.name).find("img").eq(0)
+                .attr('src', urlBase + refer.name.toLowerCase() + 'Sprites/IDLE/IDLE_00' + count + '.png')
+            
+        }, Math.floor(animationTime / numberOfImages))
     }
+}
+
+function animationCycle(imageType, imageToChange, numberOfImages, animationTime, charRef, callback){
+    var urlBase = 'assets/images/';
+
+    function recusive(imageToChange, count, numberOfImages, animationTime, charRef){
+        if( count > numberOfImages - 1 ){
+            return setTimeout(function(){
+                // finish animation time, could callback here
+                if(imageType === "ATTACK" || imageType === "HURT"){
+                    charRef.startIdle();
+                }
+            }, Math.floor( animationTime / numberOfImages ) )
+        }
+        return setTimeout(function(){
+            imageToChange.attr('src', 
+            urlBase + charRef.name.toLowerCase() + 'Sprites/' + imageType + '/' + imageType + '_00' + count + '.png')
+            
+            //console.log( urlBase + charRef.name.toLowerCase() + 'Sprites/' + imageType + '/' + imageType + '_00' + count + '.png' )
+            recusive(imageToChange, count +1, numberOfImages, animationTime, charRef);
+        }, Math.floor( animationTime / numberOfImages ) )
+    }
+
+    imageToChange.attr('src', urlBase + charRef.name.toLowerCase() + 'Sprites/' + imageType + '/' + imageType + '_000.png')
+    recusive(imageToChange, 1, numberOfImages, animationTime, charRef)
 }
 
 function createCharacter(base, data) {
     var character = Object.assign({}, base);
     character.name = data.name;
     character.images = data.images;
+    character.imageNum = data.imageNum;
     character.hitPoints = data.hitPoints;
     character.defaultHitPoints = data.hitPoints;
     character.attackPower = data.attackPower;
@@ -109,6 +167,9 @@ var knightData = {
         hurt: 'assets/images/knight/HURT_004.png',
         die: 'assets/images/knight/DIE_006.png'
     },
+    imageNum: {
+        idle: 7, attack:8, hurt: 6, die: 7
+    },
     hitPoints: 120,
     attackPower: 8,
     counterAttackPower: 35,
@@ -120,6 +181,9 @@ var warriorData = {
         attack: 'assets/images/warrior/5_ATTACK_006.png',
         hurt: 'assets/images/warrior/6_HURT_002.png',
         die: 'assets/images/warrior/7_DIE_009.png'
+    },
+    imageNum: {
+        idle: 5, attack:5, hurt: 5, die: 6
     },
     hitPoints: 120,
     attackPower: 8,
@@ -133,6 +197,9 @@ var trollData = {
         hurt: 'assets/images/troll/HURT_004.png',
         die: 'assets/images/troll/DIE_006.png'
     },
+    imageNum: {
+        idle: 7, attack:7, hurt: 7, die: 7
+    },
     hitPoints: 180,
     attackPower: 5,
     counterAttackPower: 25
@@ -144,6 +211,9 @@ var orcData = {
         attack: 'assets/images/orc/ATTAK_005.png',
         hurt: 'assets/images/orc/HURT_004.png',
         die: 'assets/images/orc/DIE_006.png'
+    },
+    imageNum: {
+        idle: 7, attack:7, hurt: 7, die: 7
     },
     hitPoints: 100,
     attackPower: 25,
